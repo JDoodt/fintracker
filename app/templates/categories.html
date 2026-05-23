@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Categories — Finance Tracker{% endblock %}
+{% block title %}Kategorien — Finanzverwaltung{% endblock %}
 
 {% block content %}
 <div class="row g-4">
   <div class="col-md-4">
     <div class="card shadow-sm">
-      <div class="card-header"><h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Add Category</h5></div>
+      <div class="card-header"><h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Kategorie hinzufügen</h5></div>
       <div class="card-body">
         <form method="post" action="/categories" novalidate>
           <div class="mb-3">
@@ -13,26 +13,26 @@
             <input type="text" class="form-control" id="name" name="name" required>
           </div>
           <div class="mb-3">
-            <label for="parent_id" class="form-label">Parent</label>
+            <label for="parent_id" class="form-label">Übergeordnet</label>
             <select class="form-select" id="parent_id" name="parent_id">
-              <option value="">— Top level —</option>
+              <option value="">— Oberste Ebene —</option>
               {% for c in top_level %}
               <option value="{{ c.id }}">{{ c.name }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="mb-4">
-            <label for="color" class="form-label">Color</label>
+            <label for="color" class="form-label">Farbe</label>
             <input type="color" class="form-control form-control-color" id="color" name="color" value="#6b7280">
           </div>
-          <button type="submit" class="btn btn-primary w-100">Create Category</button>
+          <button type="submit" class="btn btn-primary w-100">Kategorie erstellen</button>
         </form>
       </div>
     </div>
   </div>
 
   <div class="col-md-8">
-    <h4><i class="bi bi-tags me-2"></i>Categories</h4>
+    <h4><i class="bi bi-tags me-2"></i>Kategorien</h4>
     <div class="list-group">
       {% for node in tree %}
       <div class="list-group-item d-flex justify-content-between align-items-center
@@ -42,11 +42,11 @@
           <span class="badge me-2" style="background:{{ node.cat.color }}">&nbsp;</span>
           {% endif %}
           <strong>{{ node.cat.name }}</strong>
-          {% if node.cat.archived %}<span class="badge bg-secondary ms-1">archived</span>{% endif %}
+          {% if node.cat.archived %}<span class="badge bg-secondary ms-1">archiviert</span>{% endif %}
         </span>
         <form method="post" action="/categories/{{ node.cat.id }}/archive" class="d-inline">
           <button type="submit" class="btn btn-outline-secondary btn-sm py-0">
-            {% if node.cat.archived %}Restore{% else %}Archive{% endif %}
+            {% if node.cat.archived %}Wiederherstellen{% else %}Archivieren{% endif %}
           </button>
         </form>
       </div>
@@ -59,17 +59,17 @@
           <span class="badge me-2" style="background:{{ child.cat.color }}">&nbsp;</span>
           {% endif %}
           {{ child.cat.name }}
-          {% if child.cat.archived %}<span class="badge bg-secondary ms-1">archived</span>{% endif %}
+          {% if child.cat.archived %}<span class="badge bg-secondary ms-1">archiviert</span>{% endif %}
         </span>
         <form method="post" action="/categories/{{ child.cat.id }}/archive" class="d-inline">
           <button type="submit" class="btn btn-outline-secondary btn-sm py-0">
-            {% if child.cat.archived %}Restore{% else %}Archive{% endif %}
+            {% if child.cat.archived %}Wiederherstellen{% else %}Archivieren{% endif %}
           </button>
         </form>
       </div>
       {% endfor %}
       {% else %}
-      <div class="list-group-item text-muted">No categories yet. Run <code>python -m app.cli seed-categories</code> to seed defaults.</div>
+      <div class="list-group-item text-muted">Noch keine Kategorien. Führe <code>python -m app.cli seed-categories</code> aus.</div>
       {% endfor %}
     </div>
   </div>
