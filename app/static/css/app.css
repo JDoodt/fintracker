@@ -25,3 +25,6 @@ input[type="month"] {
 .badge {
   font-weight: 500;
 }
+
+/* Chart.js responsiveness */
+canvas { max-width: 100%; }

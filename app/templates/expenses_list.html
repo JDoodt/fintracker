@@ -1,24 +1,24 @@
 {% extends "base.html" %}
-{% block title %}Expenses — Finance Tracker{% endblock %}
+{% block title %}Ausgaben — Finanzverwaltung{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h4 class="mb-0"><i class="bi bi-receipt me-2"></i>Expenses</h4>
+  <h4 class="mb-0"><i class="bi bi-receipt me-2"></i>Ausgaben</h4>
   <a href="/expenses/new" class="btn btn-primary btn-sm">
-    <i class="bi bi-plus-lg"></i> Add Expense
+    <i class="bi bi-plus-lg"></i> Ausgabe hinzufügen
   </a>
 </div>
 
 <!-- Filters -->
 <form method="get" action="/expenses" class="row g-2 mb-3 align-items-end">
   <div class="col-auto">
-    <label class="form-label form-label-sm mb-1">Month</label>
+    <label class="form-label form-label-sm mb-1">Monat</label>
     <input type="month" name="month" class="form-control form-control-sm" value="{{ filter_month or '' }}">
   </div>
   <div class="col-auto">
-    <label class="form-label form-label-sm mb-1">Category</label>
+    <label class="form-label form-label-sm mb-1">Kategorie</label>
     <select name="category_id" class="form-select form-select-sm" style="min-width:140px">
-      <option value="">All categories</option>
+      <option value="">Alle Kategorien</option>
       {% for c in categories %}
       <option value="{{ c.id }}" {% if filter_category_id == c.id %}selected{% endif %}>
         {{ c.name }}
@@ -28,9 +28,9 @@
   </div>
   {% if current_user.is_admin %}
   <div class="col-auto">
-    <label class="form-label form-label-sm mb-1">User</label>
+    <label class="form-label form-label-sm mb-1">Benutzer</label>
     <select name="user_id" class="form-select form-select-sm">
-      <option value="">All users</option>
+      <option value="">Alle Benutzer</option>
       {% for u in users %}
       <option value="{{ u.id }}" {% if filter_user_id == u.id %}selected{% endif %}>{{ u.name }}</option>
       {% endfor %}
@@ -38,46 +38,48 @@
   </div>
   {% endif %}
   <div class="col-auto">
-    <button type="submit" class="btn btn-outline-secondary btn-sm">Filter</button>
-    <a href="/expenses" class="btn btn-outline-secondary btn-sm">Clear</a>
+    <button type="submit" class="btn btn-outline-secondary btn-sm">Filtern</button>
+    <a href="/expenses" class="btn btn-outline-secondary btn-sm">Zurücksetzen</a>
   </div>
 </form>
 
 <!-- Table -->
 <div class="card">
   <div class="card-body p-0">
-    <table class="table table-hover table-sm mb-0">
-      <thead class="table-light">
-        <tr>
-          <th>Date</th>
-          <th>Amount</th>
-          <th>Category</th>
-          <th>Description</th>
-          <th>By</th>
-          <th>Flags</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for e in expenses %}
-        {% include "_expense_row.html" %}
-        {% else %}
-        <tr>
-          <td colspan="7" class="text-center text-muted py-4">No expenses found.</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-      {% if expenses %}
-      <tfoot class="table-light">
-        <tr>
-          <th colspan="2" class="text-end">
-            Total: <span class="text-danger">{{ "%.2f"|format(total|float) }} €</span>
-          </th>
-          <th colspan="5"></th>
-        </tr>
-      </tfoot>
-      {% endif %}
-    </table>
+    <div class="table-responsive">
+      <table class="table table-hover table-sm mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Datum</th>
+            <th>Betrag</th>
+            <th>Kategorie</th>
+            <th>Beschreibung</th>
+            <th>Von</th>
+            <th>Markierungen</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in expenses %}
+          {% include "_expense_row.html" %}
+          {% else %}
+          <tr>
+            <td colspan="7" class="text-center text-muted py-4">Keine Ausgaben gefunden.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        {% if expenses %}
+        <tfoot class="table-light">
+          <tr>
+            <th colspan="2" class="text-end">
+              Gesamt: <span class="text-danger">{{ "%.2f"|format(total|float) }} €</span>
+            </th>
+            <th colspan="5"></th>
+          </tr>
+        </tfoot>
+        {% endif %}
+      </table>
+    </div>
   </div>
 </div>
 {% endblock %}
