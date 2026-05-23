@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% block title %}Portfolio — Finanzverwaltung{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Portfolio</h4>
+  <div class="d-flex gap-2">
+    <form method="post" action="/portfolio/refresh">
+      <button type="submit" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-clockwise"></i> Kurse aktualisieren
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Total value card -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card text-center h-100">
+      <div class="card-body">
+        <div class="text-muted small">Gesamtwert</div>
+        <div class="fs-4 fw-bold text-primary">
+          {% if total_value %}
+            {{ "%.2f"|format(total_value) }} €
+          {% else %}—{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center h-100">
+      <div class="card-body">
+        <div class="text-muted small">Positionen</div>
+        <div class="fs-4 fw-bold">{{ rows|length }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <!-- Holdings table -->
+  <div class="col-12 col-lg-8">
+    <div class="card">
+      <div class="card-header fw-semibold">Positionen</div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-sm mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Ticker</th>
+                <th>Name</th>
+                <th class="text-end">Stück</th>
+                <th class="text-end">Kurs</th>
+                <th class="text-end">Wert</th>
+                <th class="text-end">1M</th>
+                <th class="text-end">3M</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in rows %}
+              <tr>
+                <td class="fw-semibold">
+                  <a href="#chart-{{ r.holding.id }}" class="text-decoration-none">{{ r.holding.ticker }}</a>
+                </td>
+                <td class="text-muted small">{{ r.holding.name }}</td>
+                <td class="text-end">
+                  <form method="post" action="/portfolio/holdings/{{ r.holding.id }}/update"
+                        class="d-inline-flex align-items-center gap-1">
+                    <input type="text" name="quantity" value="{{ r.holding.quantity }}"
+                           class="form-control form-control-sm text-end" style="width:80px"
+                           inputmode="decimal">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm py-0 px-1">
+                      <i class="bi bi-check-lg"></i>
+                    </button>
+                  </form>
+                </td>
+                <td class="text-end text-nowrap">
+                  {% if r.current_price %}{{ "%.2f"|format(r.current_price) }} {{ r.currency }}{% else %}—{% endif %}
+                </td>
+                <td class="text-end fw-semibold text-nowrap">
+                  {% if r.current_value %}{{ "%.2f"|format(r.current_value) }} €{% else %}—{% endif %}
+                </td>
+                <td class="text-end text-nowrap">
+                  {% if r.change_1m_pct is not none %}
+                    <span class="{% if r.change_1m_pct >= 0 %}text-success{% else %}text-danger{% endif %}">
+                      {% if r.change_1m_pct >= 0 %}+{% endif %}{{ "%.1f"|format(r.change_1m_pct) }}%
+                    </span>
+                  {% else %}—{% endif %}
+                </td>
+                <td class="text-end text-nowrap">
+                  {% if r.change_3m_pct is not none %}
+                    <span class="{% if r.change_3m_pct >= 0 %}text-success{% else %}text-danger{% endif %}">
+                      {% if r.change_3m_pct >= 0 %}+{% endif %}{{ "%.1f"|format(r.change_3m_pct) }}%
+                    </span>
+                  {% else %}—{% endif %}
+                </td>
+                <td class="text-end">
+                  <form method="post" action="/portfolio/holdings/{{ r.holding.id }}/delete"
+                        class="d-inline" onsubmit="return confirm('{{ r.holding.ticker }} wirklich entfernen?')">
+                    <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-1">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="8" class="text-center text-muted py-4">
+                  Noch keine Positionen. Füge unten einen Ticker hinzu.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add holding form -->
+  <div class="col-12 col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold"><i class="bi bi-plus-circle me-1"></i>Position hinzufügen</div>
+      <div class="card-body">
+        <form method="post" action="/portfolio/holdings" novalidate>
+          <div class="mb-3">
+            <label for="ticker" class="form-label">Ticker-Symbol <span class="text-danger">*</span></label>
+            <input type="text" class="form-control text-uppercase" id="ticker" name="ticker"
+                   placeholder="z. B. AAPL, VWCE.DE" required autocomplete="off">
+            <div class="form-text">Yahoo Finance Ticker-Symbol</div>
+          </div>
+          <div class="mb-4">
+            <label for="quantity" class="form-label">Stück / Anteile <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="quantity" name="quantity"
+                   placeholder="z. B. 10 oder 2.5" inputmode="decimal" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Hinzufügen</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Portfolio total value chart -->
+{% if rows %}
+<div class="row g-4 mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header fw-semibold">Gesamtentwicklung (3 Monate)</div>
+      <div class="card-body">
+        <canvas id="totalChart" height="100"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Per-holding charts -->
+<div class="row g-4">
+  {% for r in rows %}
+  {% if r.history %}
+  <div class="col-12 col-md-6" id="chart-{{ r.holding.id }}">
+    <div class="card">
+      <div class="card-header fw-semibold">
+        {{ r.holding.ticker }}
+        <span class="text-muted fw-normal small ms-1">{{ r.holding.name }}</span>
+      </div>
+      <div class="card-body">
+        <canvas id="holdingChart{{ r.holding.id }}" height="140"></canvas>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if rows %}
+<script>
+const COLORS = ['#6366f1','#f59e0b','#10b981','#ef4444','#3b82f6','#ec4899','#f97316','#8b5cf6'];
+
+// Total portfolio chart
+(async () => {
+  const resp = await fetch('/api/portfolio/history');
+  if (!resp.ok) return;
+  const { points } = await resp.json();
+  if (!points.length) return;
+
+  new Chart(document.getElementById('totalChart'), {
+    type: 'line',
+    data: {
+      labels: points.map(p => p.date),
+      datasets: [{
+        label: 'Gesamtwert (€)',
+        data: points.map(p => p.value),
+        borderColor: '#6366f1',
+        backgroundColor: 'rgba(99,102,241,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 2,
+      }],
+    },
+    options: {
+      scales: { y: { beginAtZero: false } },
+      plugins: { legend: { display: false } },
+    },
+  });
+})();
+
+// Per-holding charts
+const holdingData = [
+  {% for r in rows %}
+  {% if r.history %}
+  {
+    id: {{ r.holding.id }},
+    ticker: "{{ r.holding.ticker }}",
+    history: {{ r.history | tojson }},
+  },
+  {% endif %}
+  {% endfor %}
+];
+
+holdingData.forEach((h, i) => {
+  const el = document.getElementById('holdingChart' + h.id);
+  if (!el) return;
+  new Chart(el, {
+    type: 'line',
+    data: {
+      labels: h.history.map(p => p.date),
+      datasets: [{
+        label: h.ticker,
+        data: h.history.map(p => p.value),
+        borderColor: COLORS[i % COLORS.length],
+        backgroundColor: 'rgba(0,0,0,0.04)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 2,
+      }],
+    },
+    options: {
+      scales: { y: { beginAtZero: false } },
+      plugins: { legend: { display: false } },
+    },
+  });
+});
+</script>
+{% endif %}
+{% endblock %}

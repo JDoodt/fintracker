@@ -110,6 +110,20 @@ def cmd_backup(args):
     print(f"Backup written to {dst}")
 
 
+def cmd_refresh_prices(args):
+    from app.services.prices import refresh_all
+    db = _get_db()
+    try:
+        results = refresh_all(db)
+        for ticker, ok in results.items():
+            status = "OK" if ok else "FEHLER"
+            print(f"  {ticker}: {status}")
+        if not results:
+            print("Keine Positionen vorhanden.")
+    finally:
+        db.close()
+
+
 def main():
     parser = argparse.ArgumentParser(prog="python -m app.cli")
     sub = parser.add_subparsers(dest="command")
@@ -119,6 +133,7 @@ def main():
 
     sub.add_parser("seed-categories", help="Seed default categories")
     sub.add_parser("backup", help="Backup the database")
+    sub.add_parser("refresh-prices", help="Fetch latest prices for all holdings")
 
     args = parser.parse_args()
     if args.command == "create-admin":
@@ -127,6 +142,8 @@ def main():
         cmd_seed_categories(args)
     elif args.command == "backup":
         cmd_backup(args)
+    elif args.command == "refresh-prices":
+        cmd_refresh_prices(args)
     else:
         parser.print_help()
         sys.exit(1)

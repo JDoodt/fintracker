@@ -124,3 +124,38 @@ class ImportRule(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
 
     category: Mapped[Optional["Category"]] = relationship("Category", back_populates="import_rules")
+
+
+class Holding(Base):
+    """A shared household position: ticker + quantity owned."""
+    __tablename__ = "holdings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    ticker: Mapped[str] = mapped_column(String(20), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    quantity: Mapped[Decimal] = mapped_column(Numeric(16, 6), nullable=False)
+    added_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+    price_snapshots: Mapped[List["PriceSnapshot"]] = relationship(
+        "PriceSnapshot", back_populates="holding", order_by="PriceSnapshot.date"
+    )
+
+
+class PriceSnapshot(Base):
+    """One daily price record per holding."""
+    __tablename__ = "price_snapshots"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    holding_id: Mapped[int] = mapped_column(Integer, ForeignKey("holdings.id", ondelete="CASCADE"), nullable=False)
+    date: Mapped[date] = mapped_column(Date, nullable=False)
+    price: Mapped[Decimal] = mapped_column(Numeric(16, 6), nullable=False)
+    currency: Mapped[str] = mapped_column(String(10), nullable=False, default="EUR")
+    fetched_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+    holding: Mapped["Holding"] = relationship("Holding", back_populates="price_snapshots")
+
+    __table_args__ = (
+        UniqueConstraint("holding_id", "date", name="uq_price_snapshot_holding_date"),
+        Index("ix_price_snapshots_holding_date", "holding_id", "date"),
+    )

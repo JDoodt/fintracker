@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import settings
-from app.routers import auth, expenses, income, categories, reports, exports, imports as imports_router
+from app.routers import auth, expenses, income, categories, reports, exports, imports as imports_router, portfolio
 
 app = FastAPI(title="Family Finance Tracker")
 
@@ -26,3 +26,4 @@ app.include_router(categories.router)
 app.include_router(reports.router)
 app.include_router(exports.router)
 app.include_router(imports_router.router)
+app.include_router(portfolio.router)

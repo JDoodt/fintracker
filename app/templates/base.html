@@ -41,6 +41,11 @@
             <i class="bi bi-upload"></i> Importieren
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link{% if '/portfolio' in request.url.path %} active{% endif %}" href="/portfolio">
+            <i class="bi bi-graph-up-arrow"></i> Portfolio
+          </a>
+        </li>
         {% if current_user.is_admin %}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
