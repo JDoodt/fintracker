@@ -1,0 +1,27 @@
+/* Finance Tracker — custom styles */
+
+body {
+  font-size: 0.92rem;
+}
+
+.navbar-brand {
+  font-size: 1.1rem;
+}
+
+.card {
+  border-radius: 0.5rem;
+}
+
+.table th, .table td {
+  vertical-align: middle;
+}
+
+/* Make month input nicer on all browsers */
+input[type="month"] {
+  min-width: 140px;
+}
+
+/* Compact badge styling */
+.badge {
+  font-weight: 500;
+}

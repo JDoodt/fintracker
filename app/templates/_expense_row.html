@@ -1,0 +1,31 @@
+<tr>
+  <td class="text-nowrap">{{ e.date.isoformat() }}</td>
+  <td class="text-end text-nowrap text-danger fw-semibold">{{ "%.2f"|format(e.amount|float) }} €</td>
+  <td>
+    {% if e.category %}
+      {% if e.category.color %}
+      <span class="badge" style="background:{{ e.category.color }}">{{ e.category.name }}</span>
+      {% else %}
+      <span class="badge bg-secondary">{{ e.category.name }}</span>
+      {% endif %}
+    {% else %}
+    <span class="text-muted">—</span>
+    {% endif %}
+  </td>
+  <td>{{ e.description or "" }}</td>
+  <td class="text-muted small">{{ e.user.name }}</td>
+  <td class="text-nowrap">
+    {% if e.recurring %}<span class="badge bg-info text-dark">recurring</span>{% endif %}
+    {% if e.source == 'import' %}<span class="badge bg-secondary">import</span>{% endif %}
+  </td>
+  <td class="text-end">
+    {% if e.user_id == current_user.id or current_user.is_admin %}
+    <form method="post" action="/expenses/{{ e.id }}/delete" class="d-inline"
+          onsubmit="return confirm('Delete this expense?')">
+      <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-1">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </form>
+    {% endif %}
+  </td>
+</tr>

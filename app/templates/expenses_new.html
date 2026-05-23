@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Add Expense — Finance Tracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Add Expense</h5>
+      </div>
+      <div class="card-body">
+        <form method="post" action="/expenses" novalidate>
+          <div class="mb-3">
+            <label for="date" class="form-label">Date <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" id="date" name="date" value="{{ today }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="amount" class="form-label">Amount (€) <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="amount" name="amount"
+                   placeholder="0.00" inputmode="decimal" required>
+          </div>
+          <div class="mb-3">
+            <label for="category_id" class="form-label">Category</label>
+            <select class="form-select" id="category_id" name="category_id">
+              <option value="">— Uncategorized —</option>
+              {% for c in categories %}
+              <option value="{{ c.id }}">
+                {% if c.parent_id %}↳ {% endif %}{{ c.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <input type="text" class="form-control" id="description" name="description"
+                   placeholder="Optional note" maxlength="500">
+          </div>
+          <div class="mb-4 form-check">
+            <input type="checkbox" class="form-check-input" id="recurring" name="recurring">
+            <label class="form-check-label" for="recurring">Recurring expense</label>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="/expenses" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
